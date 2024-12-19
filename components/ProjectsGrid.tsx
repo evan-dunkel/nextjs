@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, usePresence } from "motion/react";
 import { useState, useRef, useEffect } from "react";
 import { Project } from "@/types/project";
 import Image from "next/image";
@@ -12,9 +12,8 @@ interface ProjectsGridProps {
 
 export function ProjectsGrid({ projects }: ProjectsGridProps) {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [showGridImages, setShowGridImages] = useState(true);
   const [bounds, setBounds] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [hiddenImageId, setHiddenImageId] = useState<string | null>(null);
 
   const handleProjectClick = (project: Project, event: React.MouseEvent) => {
     const element = event.currentTarget as HTMLElement;
@@ -25,7 +24,7 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
       width: rect.width,
       height: rect.height,
     });
-    setShowGridImages(false);
+    setHiddenImageId(project.id);
     setSelectedProject(project);
   };
 
@@ -45,33 +44,65 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
     }
   };
 
+  const GridImage = ({ project }: { project: Project }) => {
+    const [isPresent, safeToRemove] = usePresence();
+
+    useEffect(() => {
+      !isPresent && setTimeout(safeToRemove, 300);
+    }, [isPresent, safeToRemove]);
+
+    return (
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Image
+          src={project.imageUrl}
+          alt={project.title}
+          fill
+          className={cn(
+            "object-cover transition-transform duration-300 rounded-lg outline outline-1 outline-muted-foreground",
+            project.size === "small" && "hover:scale-[1.0125]",
+            project.size === "medium" && "hover:scale-[1.0075]",
+            project.size === "large" && "hover:scale-[1.004]"
+          )}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
+      </motion.div>
+    );
+  };
+
   return (
     <>
       <div className="grid grid-cols-12 gap-6 auto-rows-min grid-flow-dense">
         {projects.map((project) => (
-          <div className={`relative w-full ${getProjectStyles(project.size)}`}>
+          <div
+            key={project.id}
+            className={`relative w-full ${getProjectStyles(project.size)}`}
+          >
             <motion.div
-              key={project.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={(e) => handleProjectClick(project, e)}
             >
-              <div className="relative aspect-[3/2]">
-                {(!selectedProject ||
-                  selectedProject.title !== project.title ||
-                  (selectedProject.title === project.title &&
-                    showGridImages)) && (
+              <div className="relative aspect-[4/3]">
+                {hiddenImageId !== project.id && (
                   <Image
                     src={project.imageUrl}
                     alt={project.title}
                     fill
-                    className="object-cover transition-transform duration-300 hover:scale-[1.01] rounded-lg outline outline-1 outline-muted-foreground"
+                    className={cn(
+                      "object-cover transition-transform duration-300 rounded-lg outline outline-1 outline-muted-foreground",
+                      project.size === "small" && "hover:scale-[1.0125]",
+                      project.size === "medium" && "hover:scale-[1.0075]",
+                      project.size === "large" && "hover:scale-[1.004]"
+                    )}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                 )}
               </div>
             </motion.div>
-
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -92,10 +123,8 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
       </div>
 
       <AnimatePresence
-        onExitComplete={() => {
-          setIsAnimating(false);
-          setShowGridImages(true);
-        }}
+        mode="wait"
+        onExitComplete={() => setHiddenImageId(null)}
       >
         {selectedProject && (
           <>
@@ -104,11 +133,11 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-background/30 backdrop-blur-xl backdrop-saturate-150 backdrop-brightness-105 z-40"
+              className="fixed inset-0 backdrop-brightness-90 z-40"
               onClick={() => setSelectedProject(null)}
             />
             <motion.div
-              className="fixed bg-background rounded-lg overflow-hidden outline outline-1 outline-muted-foreground z-50"
+              className="fixed bg-background rounded-lg overflow-hidden outline outline-1 outline-muted-foreground shadow-xl z-50"
               initial={{
                 top: bounds.y,
                 left: bounds.x,
@@ -120,13 +149,8 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                 left: "50%",
                 x: "-50%",
                 y: "-50%",
-                width: "90vw",
+                width: "45vw",
                 height: "90vh",
-                transition: {
-                  type: "spring",
-                  damping: 34,
-                  stiffness: 500,
-                },
               }}
               exit={{
                 top: bounds.y,
@@ -135,13 +159,7 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                 height: bounds.height,
                 x: 0,
                 y: 0,
-                transition: {
-                  type: "tween",
-                  duration: 0.3,
-                  ease: "easeInOut",
-                },
               }}
-              onAnimationStart={() => setIsAnimating(true)}
             >
               <div className="h-full overflow-y-auto">
                 <div className="relative">
@@ -163,7 +181,7 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                     }}
                     exit={{ padding: 0 }}
                   >
-                    <div className="relative aspect-[3/2]">
+                    <div className="relative aspect-[4/3]">
                       <Image
                         src={selectedProject.imageUrl}
                         alt={selectedProject.title}
