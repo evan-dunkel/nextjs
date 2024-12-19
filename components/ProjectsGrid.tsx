@@ -154,140 +154,157 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
         {selectedProject && (
           <>
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 backdrop-brightness-90 z-40"
-              onClick={handleModalClose}
-            />
-            <motion.div
-              className="fixed bg-background overflow-hidden z-50"
               initial={{
-                position: "fixed",
-                top: bounds.y,
-                left: bounds.x,
-                width: bounds.width,
-                height: bounds.height,
-                borderRadius: "0.5rem",
-                boxShadow: "none",
+                opacity: 1,
+                backgroundColor: "rgba(0, 0, 0, 0)",
               }}
               animate={{
-                top:
-                  window.innerWidth < 768
-                    ? 0
-                    : window.innerHeight / 2 - (window.innerHeight * 0.9) / 2,
-                left:
-                  window.innerWidth < 768
-                    ? 0
-                    : window.innerWidth / 2 -
-                      (window.innerWidth *
-                        (window.innerWidth < 1024 ? 0.65 : 0.45)) /
-                        2,
-                width:
-                  window.innerWidth < 768
-                    ? "100vw"
-                    : window.innerWidth < 1024
-                      ? "65vw"
-                      : "45vw",
-                height: window.innerWidth < 768 ? "100vh" : "90vh",
-                borderRadius: window.innerWidth < 768 ? "0rem" : "0.75rem",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                opacity: 1,
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
               exit={{
-                top: bounds.y,
-                left: bounds.x,
-                width: bounds.width,
-                height: bounds.height,
-                borderRadius: "0.5rem",
-                boxShadow: "none",
+                opacity: 1,
+                backgroundColor: "rgba(0, 0, 0, 0)",
               }}
               transition={{
-                type: "spring",
-                damping: 44,
-                stiffness: 500,
+                duration: 0.3,
               }}
+              className="fixed inset-0 z-40 overflow-y-scroll"
+              onClick={handleModalClose}
             >
-              <div className="h-full overflow-y-auto">
-                <div className="relative">
-                  <button
+              <div className="min-h-full w-full flex items-start overflow-y-scroll justify-center py-10 md:py-10">
+                <motion.div
+                  className="bg-background z-50 my-auto overflow-hidden"
+                  initial={{
+                    position: "fixed",
+                    top: bounds.y,
+                    left: bounds.x,
+                    width: bounds.width,
+                    height: bounds.height,
+                    borderRadius: "0.5rem",
+                    boxShadow: "none",
+                    opacity: 1,
+                    outlineStyle: "solid",
+                    outlineWidth: "1px",
+                    outlineColor: "hsl(var(--muted-foreground) / 0.0)",
+                  }}
+                  animate={{
+                    top: window.innerWidth < 768 ? 0 : "auto",
+                    left: window.innerWidth < 768 ? 0 : "50%",
+                    transform:
+                      window.innerWidth < 768 ? "none" : "translateX(-50%)",
+                    width:
+                      window.innerWidth < 768
+                        ? "100vw"
+                        : window.innerWidth < 1024
+                          ? "65vw"
+                          : "45vw",
+                    height: window.innerWidth < 768 ? "100vh" : "auto",
+                    borderRadius: window.innerWidth < 768 ? "0" : "0.75rem",
+                    boxShadow:
+                      window.innerWidth < 768
+                        ? "none"
+                        : "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                    opacity: 1,
+                    outlineStyle: "solid",
+                    outlineColor: "hsl(var(--muted-foreground) / 0.25)",
+                    maxHeight: window.innerWidth < 768 ? "100vh" : "85vh",
+                  }}
+                  exit={{
+                    top: bounds.y,
+                    left: bounds.x,
+                    transform: "none",
+                    width: bounds.width,
+                    height: bounds.height,
+                    borderRadius: "0.5rem",
+                    boxShadow: "none",
+                    opacity: 1,
+                    outlineStyle: "solid",
+                    outlineColor: "hsl(var(--muted-foreground) / 0.0)",
+                  }}
+                  transition={{
+                    type: "spring",
+                    damping: 44,
+                    stiffness: 500,
+                  }}
+                >
+                  <motion.button
                     onClick={handleModalClose}
-                    className="absolute top-4 right-4 z-50 text-muted-foreground hover:text-foreground"
+                    className="fixed md:absolute top-4 right-4 z-50 text-muted-foreground hover:text-foreground bg-background/80 backdrop-blur-sm p-2 rounded-full w-8 h-8 flex items-center justify-center hover:bg-background/90 transition-colors"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
                   >
                     ✕
-                  </button>
-                  <motion.div
-                    initial={{
-                      padding: 0,
-                      // boxShadow: "0 0 0 rgba(0, 0, 0, 0)",
-                    }}
-                    animate={{
-                      padding: ".75rem",
-                      // boxShadow:
-                      //   "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                      transition: {
-                        type: "spring",
-                        damping: 50,
-                        stiffness: 1000,
-                      },
-                    }}
-                    exit={{
-                      padding: 0,
-                      boxShadow: "0 0 0 rgba(0, 0, 0, 0)",
-                    }}
-                  >
-                    <div className="relative aspect-[4/3]">
-                      <motion.div
-                        initial={{ borderRadius: "0.5rem" }}
-                        animate={{ borderRadius: "0.5rem" }}
-                        exit={{ borderRadius: "0.5rem" }}
-                        className="absolute inset-0 overflow-hidden"
-                      >
-                        <Image
-                          src={selectedProject.imageUrl}
-                          alt={selectedProject.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 1024px) 100vw, 75vw"
-                          priority
-                        />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, padding: 0 }}
-                    animate={{
-                      opacity: 1,
-                      height: "auto",
-                      transition: {
-                        delay: 0.2,
-                        duration: 0.3,
-                      },
-                    }}
-                    exit={{
-                      opacity: 0,
-                      height: 0,
-                      transition: {
-                        duration: 0.2,
-                        opacity: { duration: 0.1 },
-                      },
-                    }}
-                  >
-                    <div className="px-6">
-                      <h2 className="text-2xl font-bold">
-                        {selectedProject.title}
-                      </h2>
-                      <p className="text-muted-foreground">
-                        {selectedProject.description}
-                      </p>
-                      {selectedProject.content && (
-                        <div className="prose max-w-none dark:prose-invert">
-                          {selectedProject.content}
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                </div>
+                  </motion.button>
+                  <div className="relative overflow-y-auto h-full md:max-h-[85vh]">
+                    <motion.div
+                      initial={{
+                        padding: 0,
+                      }}
+                      animate={{
+                        padding: ".75rem",
+                        transition: {
+                          type: "spring",
+                          damping: 50,
+                          stiffness: 1000,
+                        },
+                      }}
+                      exit={{
+                        padding: 0,
+                      }}
+                    >
+                      <div className="relative aspect-[4/3]">
+                        <motion.div
+                          initial={{ borderRadius: "0.5rem" }}
+                          animate={{ borderRadius: "0.5rem" }}
+                          exit={{ borderRadius: "0.5rem" }}
+                          className="absolute inset-0 overflow-hidden"
+                        >
+                          <Image
+                            src={selectedProject.imageUrl}
+                            alt={selectedProject.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 75vw"
+                            priority
+                          />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{
+                        height: "auto",
+                        transition: {
+                          duration: 0.3,
+                        },
+                      }}
+                      exit={{
+                        height: 0,
+                        transition: {
+                          duration: 0.2,
+                        },
+                      }}
+                      className="h-full"
+                    >
+                      <div className="px-6 pb-6">
+                        <h2 className="text-2xl font-bold">
+                          {selectedProject.title}
+                        </h2>
+                        <p className="text-muted-foreground">
+                          {selectedProject.description}
+                        </p>
+                        {selectedProject.content && (
+                          <div className="prose max-w-none dark:prose-invert">
+                            {selectedProject.content}
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
           </>
