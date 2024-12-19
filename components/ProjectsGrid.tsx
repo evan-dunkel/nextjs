@@ -60,8 +60,7 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                 {(!selectedProject ||
                   selectedProject.title !== project.title ||
                   (selectedProject.title === project.title &&
-                    showGridImages &&
-                    !isAnimating)) && (
+                    showGridImages)) && (
                   <Image
                     src={project.imageUrl}
                     alt={project.title}
@@ -105,11 +104,11 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/60 z-40"
+              className="fixed inset-0 bg-background/30 backdrop-blur-xl backdrop-saturate-150 backdrop-brightness-105 z-40"
               onClick={() => setSelectedProject(null)}
             />
             <motion.div
-              className="fixed bg-background rounded-lg overflow-hidden z-50"
+              className="fixed bg-background rounded-lg overflow-hidden outline outline-1 outline-muted-foreground z-50"
               initial={{
                 top: bounds.y,
                 left: bounds.x,
@@ -152,22 +151,38 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                   >
                     ✕
                   </button>
-                  <div className="relative aspect-[3/2]">
-                    <Image
-                      src={selectedProject.imageUrl}
-                      alt={selectedProject.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 75vw"
-                    />
-                  </div>
                   <motion.div
-                    className="p-6"
-                    initial={{ opacity: 0 }}
+                    initial={{ padding: 0 }}
+                    animate={{
+                      padding: ".75rem",
+                      transition: {
+                        type: "spring",
+                        damping: 34,
+                        stiffness: 500,
+                      },
+                    }}
+                    exit={{ padding: 0 }}
+                  >
+                    <div className="relative aspect-[3/2]">
+                      <Image
+                        src={selectedProject.imageUrl}
+                        alt={selectedProject.title}
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="(max-width: 1024px) 100vw, 75vw"
+                        priority
+                      />
+                    </div>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, padding: 0 }}
                     animate={{
                       opacity: 1,
                       height: "auto",
-                      transition: { delay: 0 },
+                      transition: {
+                        delay: 0.25,
+                        duration: 0.4,
+                      },
                     }}
                     exit={{
                       opacity: 0,
@@ -178,17 +193,19 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                       },
                     }}
                   >
-                    <h2 className="text-2xl font-bold mb-2">
-                      {selectedProject.title}
-                    </h2>
-                    <p className="text-muted-foreground mb-4">
-                      {selectedProject.description}
-                    </p>
-                    {selectedProject.content && (
-                      <div className="prose max-w-none dark:prose-invert">
-                        {selectedProject.content}
-                      </div>
-                    )}
+                    <div className="px-6">
+                      <h2 className="text-2xl font-bold">
+                        {selectedProject.title}
+                      </h2>
+                      <p className="text-muted-foreground">
+                        {selectedProject.description}
+                      </p>
+                      {selectedProject.content && (
+                        <div className="prose max-w-none dark:prose-invert">
+                          {selectedProject.content}
+                        </div>
+                      )}
+                    </div>
                   </motion.div>
                 </div>
               </div>
