@@ -162,13 +162,15 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
               onClick={handleModalClose}
             />
             <motion.div
-              className="fixed bg-background overflow-hidden outline outline-1 outline-muted-foreground/50 shadow-xl z-50 md:rounded-xl"
+              className="fixed bg-background overflow-hidden z-50"
               initial={{
                 position: "fixed",
                 top: bounds.y,
                 left: bounds.x,
                 width: bounds.width,
                 height: bounds.height,
+                borderRadius: "0.5rem",
+                boxShadow: "none",
               }}
               animate={{
                 top:
@@ -186,15 +188,19 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                   window.innerWidth < 768
                     ? "100vw"
                     : window.innerWidth < 1024
-                    ? "65vw"
-                    : "45vw",
+                      ? "65vw"
+                      : "45vw",
                 height: window.innerWidth < 768 ? "100vh" : "90vh",
+                borderRadius: window.innerWidth < 768 ? "0rem" : "0.75rem",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
               }}
               exit={{
                 top: bounds.y,
                 left: bounds.x,
                 width: bounds.width,
                 height: bounds.height,
+                borderRadius: "0.5rem",
+                boxShadow: "none",
               }}
               transition={{
                 type: "spring",
@@ -211,26 +217,41 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                     ✕
                   </button>
                   <motion.div
-                    initial={{ padding: 0 }}
+                    initial={{
+                      padding: 0,
+                      // boxShadow: "0 0 0 rgba(0, 0, 0, 0)",
+                    }}
                     animate={{
                       padding: ".75rem",
+                      // boxShadow:
+                      //   "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                       transition: {
                         type: "spring",
                         damping: 50,
                         stiffness: 1000,
                       },
                     }}
-                    exit={{ padding: 0 }}
+                    exit={{
+                      padding: 0,
+                      boxShadow: "0 0 0 rgba(0, 0, 0, 0)",
+                    }}
                   >
                     <div className="relative aspect-[4/3]">
-                      <Image
-                        src={selectedProject.imageUrl}
-                        alt={selectedProject.title}
-                        fill
-                        className="object-cover rounded-lg"
-                        sizes="(max-width: 1024px) 100vw, 75vw"
-                        priority
-                      />
+                      <motion.div
+                        initial={{ borderRadius: "0.5rem" }}
+                        animate={{ borderRadius: "0.5rem" }}
+                        exit={{ borderRadius: "0.5rem" }}
+                        className="absolute inset-0 overflow-hidden"
+                      >
+                        <Image
+                          src={selectedProject.imageUrl}
+                          alt={selectedProject.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 75vw"
+                          priority
+                        />
+                      </motion.div>
                     </div>
                   </motion.div>
                   <motion.div
