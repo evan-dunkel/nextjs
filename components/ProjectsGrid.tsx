@@ -15,6 +15,18 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
   const [bounds, setBounds] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [hiddenImageId, setHiddenImageId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (selectedProject) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [selectedProject]);
+
   const handleProjectClick = (project: Project, event: React.MouseEvent) => {
     const element = event.currentTarget as HTMLElement;
     const rect = element.getBoundingClientRect();
@@ -52,25 +64,32 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
     }, [isPresent, safeToRemove]);
 
     return (
-      <motion.div
-        initial={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Image
-          src={project.imageUrl}
-          alt={project.title}
-          fill
-          className={cn(
-            "object-cover transition-transform duration-300 rounded-lg outline outline-1 outline-muted-foreground",
-            project.size === "small" && "hover:scale-[1.0125]",
-            project.size === "medium" && "hover:scale-[1.0075]",
-            project.size === "large" && "hover:scale-[1.004]"
-          )}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-      </motion.div>
+      <div className="outline outline-1 outline-muted-foreground">
+        <motion.div
+          className="outline outline-1"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <Image
+            src={project.imageUrl}
+            alt={project.title}
+            fill
+            className={cn(
+              "object-cover transition-transform duration-300 rounded-lg",
+              project.size === "small" && "hover:scale-[1.0125]",
+              project.size === "medium" && "hover:scale-[1.0075]",
+              project.size === "large" && "hover:scale-[1.004]"
+            )}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        </motion.div>
+      </div>
     );
+  };
+
+  const handleModalClose = () => {
+    setTimeout(() => setHiddenImageId(null), 335);
+    setSelectedProject(null);
   };
 
   return (
@@ -87,19 +106,27 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
               onClick={(e) => handleProjectClick(project, e)}
             >
               <div className="relative aspect-[4/3]">
-                {hiddenImageId !== project.id && (
-                  <Image
-                    src={project.imageUrl}
-                    alt={project.title}
-                    fill
-                    className={cn(
-                      "object-cover transition-transform duration-300 rounded-lg outline outline-1 outline-muted-foreground",
-                      project.size === "small" && "hover:scale-[1.0125]",
-                      project.size === "medium" && "hover:scale-[1.0075]",
-                      project.size === "large" && "hover:scale-[1.004]"
-                    )}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
+                {hiddenImageId !== project.id ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Image
+                      src={project.imageUrl}
+                      alt={project.title}
+                      fill
+                      className={cn(
+                        "object-cover transition-transform duration-300 rounded-lg outline outline-1 outline-muted-foreground",
+                        project.size === "small" && "hover:scale-[1.0125]",
+                        project.size === "medium" && "hover:scale-[1.0075]",
+                        project.size === "large" && "hover:scale-[1.004]"
+                      )}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  </motion.div>
+                ) : (
+                  <div className="w-full h-full rounded-lg outline outline-1 outline-muted-foreground/25" />
                 )}
               </div>
             </motion.div>
@@ -122,10 +149,8 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
         ))}
       </div>
 
-      <AnimatePresence
-        mode="wait"
-        onExitComplete={() => setHiddenImageId(null)}
-      >
+      {/* Modal */}
+      <AnimatePresence mode="wait">
         {selectedProject && (
           <>
             <motion.div
@@ -134,37 +159,53 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               className="fixed inset-0 backdrop-brightness-90 z-40"
-              onClick={() => setSelectedProject(null)}
+              onClick={handleModalClose}
             />
             <motion.div
-              className="fixed bg-background rounded-lg overflow-hidden outline outline-1 outline-muted-foreground shadow-xl z-50"
+              className="fixed bg-background overflow-hidden outline outline-1 outline-muted-foreground/50 shadow-xl z-50 md:rounded-xl"
               initial={{
+                position: "fixed",
                 top: bounds.y,
                 left: bounds.x,
                 width: bounds.width,
                 height: bounds.height,
               }}
               animate={{
-                top: "50%",
-                left: "50%",
-                x: "-50%",
-                y: "-50%",
-                width: "45vw",
-                height: "90vh",
+                top:
+                  window.innerWidth < 768
+                    ? 0
+                    : window.innerHeight / 2 - (window.innerHeight * 0.9) / 2,
+                left:
+                  window.innerWidth < 768
+                    ? 0
+                    : window.innerWidth / 2 -
+                      (window.innerWidth *
+                        (window.innerWidth < 1024 ? 0.65 : 0.45)) /
+                        2,
+                width:
+                  window.innerWidth < 768
+                    ? "100vw"
+                    : window.innerWidth < 1024
+                    ? "65vw"
+                    : "45vw",
+                height: window.innerWidth < 768 ? "100vh" : "90vh",
               }}
               exit={{
                 top: bounds.y,
                 left: bounds.x,
                 width: bounds.width,
                 height: bounds.height,
-                x: 0,
-                y: 0,
+              }}
+              transition={{
+                type: "spring",
+                damping: 44,
+                stiffness: 500,
               }}
             >
               <div className="h-full overflow-y-auto">
                 <div className="relative">
                   <button
-                    onClick={() => setSelectedProject(null)}
+                    onClick={handleModalClose}
                     className="absolute top-4 right-4 z-50 text-muted-foreground hover:text-foreground"
                   >
                     ✕
@@ -175,8 +216,8 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                       padding: ".75rem",
                       transition: {
                         type: "spring",
-                        damping: 34,
-                        stiffness: 500,
+                        damping: 50,
+                        stiffness: 1000,
                       },
                     }}
                     exit={{ padding: 0 }}
@@ -198,8 +239,8 @@ export function ProjectsGrid({ projects }: ProjectsGridProps) {
                       opacity: 1,
                       height: "auto",
                       transition: {
-                        delay: 0.25,
-                        duration: 0.4,
+                        delay: 0.2,
+                        duration: 0.3,
                       },
                     }}
                     exit={{
